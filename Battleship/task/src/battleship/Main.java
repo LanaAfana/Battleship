@@ -5,10 +5,9 @@ import java.util.Scanner;
 public class Main {
 
     public static int placeShip(BattleField battleField, int step, boolean isRepeat) {
-        BattleField.KindsOfShips kind = BattleField.KindsOfShips.values()[step];
         if (!isRepeat)
             System.out.printf("Enter the coordinates of the %s:\n", BattleField.KindsOfShips.values()[step].name);
-        try (Scanner scanner = new Scanner(System.in);) {
+        try (Scanner scanner = new Scanner(System.in)) {
             int[] inputCoordinates = battleField.getCoordinates(scanner.nextLine(), step);
             if (inputCoordinates.length == 4) {
                 battleField.addShip(inputCoordinates);
@@ -30,6 +29,20 @@ public class Main {
             step += placeShip(battleField, step, isRepeat);
             isRepeat = tempStep == step;
         }
-
+//        int count = 0;
+        System.out.println("The game starts!");
+        battleField.output();
+        System.out.println("Take a shot!");
+        boolean flag = true;
+        while (flag) {
+            try (Scanner scanner = new Scanner(System.in)) {
+                int[] inputCoordinate = battleField.getCoordinate(scanner.nextLine());
+                if (inputCoordinate.length == 2) {
+                    battleField.takeShot(inputCoordinate);
+                    battleField.output();
+                    flag = false;
+                }
+            }
+        }
     }
 }
