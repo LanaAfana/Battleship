@@ -11,7 +11,7 @@ public class Main {
             int[] inputCoordinates = battleField.getCoordinates(scanner.nextLine(), step);
             if (inputCoordinates.length == 4) {
                 battleField.addShip(inputCoordinates);
-                battleField.output();
+                battleField.output(false);
                 return 1;
             } else {
                 return 0;
@@ -21,7 +21,7 @@ public class Main {
 
     public static void main(String[] args) {
         BattleField battleField = new BattleField(10);
-        battleField.output();
+        battleField.output(false);
         int step = 0;
         boolean isRepeat = false;
         while (step < BattleField.KindsOfShips.values().length) {
@@ -31,7 +31,7 @@ public class Main {
         }
 //        int count = 0;
         System.out.println("The game starts!");
-        battleField.output();
+        battleField.output(true);
         System.out.println("Take a shot!");
         boolean flag = true;
         while (flag) {
@@ -39,7 +39,7 @@ public class Main {
                 int[] inputCoordinate = battleField.getCoordinate(scanner.nextLine());
                 if (inputCoordinate.length == 2) {
                     battleField.takeShot(inputCoordinate);
-                    battleField.output();
+                    battleField.output(false);
                     flag = false;
                 }
             }

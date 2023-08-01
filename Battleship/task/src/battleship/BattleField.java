@@ -155,7 +155,7 @@ public class BattleField {
           return true;
      }
 
-     public void output() {
+     public void output(boolean fog) {
           StringBuilder output = new StringBuilder("  ");
 
           for (int i = 1; i <= size; i++) {
@@ -167,7 +167,11 @@ public class BattleField {
                     if (j == 0) {
                          output.append(digitToLetter(i)).append(" ");
                     }
-                    output.append(field[j][i]).append(" ");
+                    if (fog && field[j][i].equals(BUSY)) {
+                         output.append("~").append(" ");
+                    } else {
+                         output.append(field[j][i]).append(" ");
+                    }
                }
                output.append("\n");
           }
@@ -186,10 +190,12 @@ public class BattleField {
           switch (this.field[crdnts[0]][crdnts[1]]) {
                case BUSY -> {
                     this.field[crdnts[0]][crdnts[1]] = "X";
+                    this.output(true);
                     System.out.println("You hit a ship!");
                }
                case "~" -> {
                     this.field[crdnts[0]][crdnts[1]] = "M";
+                    this.output(true);
                     System.out.println("You missed!");
                }
           }
