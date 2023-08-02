@@ -1,9 +1,12 @@
 package battleship;
 
 
+import java.util.Arrays;
+
 public class BattleField {
      private final String[][] field;
      private final int size;
+     int[][] shipCrdnts;
      private static final String BUSY = "O";
 
      BattleField(int size) {
@@ -13,6 +16,7 @@ public class BattleField {
                for (int j = 0; j < size; j++) {
                     field[i][j] = "~";
                }
+          shipCrdnts = new int[KindsOfShips.values().length][2];
      }
 
      enum KindsOfShips {
@@ -28,6 +32,14 @@ public class BattleField {
           KindsOfShips(int numOfCells, String name) {
                this.numOfCells = numOfCells;
                this.name = name;
+          }
+
+          static int cellsToHit() {
+               int sum = 0;
+               for (KindsOfShips value : KindsOfShips.values()) {
+                    sum += value.numOfCells;
+               }
+               return sum;
           }
 
      }
@@ -178,7 +190,8 @@ public class BattleField {
           System.out.println(output);
      }
 
-     public void addShip(int[] crdnts) {
+     public void addShip(int[] crdnts, int step) {
+          shipCrdnts[step] = crdnts;
           for (int i = crdnts[0]; i <= crdnts[2]; i++){
                for (int j = crdnts[1]; j <= crdnts[3]; j++) {
                     this.field[i][j] = BUSY;
@@ -186,17 +199,62 @@ public class BattleField {
           }
      }
 
-     public void takeShot(int[] crdnts) {
-          switch (this.field[crdnts[0]][crdnts[1]]) {
-               case BUSY -> {
-                    this.field[crdnts[0]][crdnts[1]] = "X";
-                    this.output(true);
-                    System.out.println("You hit a ship!");
+     boolean isSankShip() {
+          boolean flag = true;
+          for (int i = 0; i < shipCrdnts.length; i++) {
+               if (Arrays.stream(shipCrdnts[i]).sum() == 0) continue;
+               if (shipCrdnts[i][0] == shipCrdnts[i][2]) {
+                    for (int k = shipCrdnts[i][1]; k <= shipCrdnts[i][3]; k++) {
+                         if (!field[shipCrdnts[i][0]][k].equals("X")) {
+                              return false;
+                         }
+                    }
+               } else {
+                    System.out.println(shipCrdnts[i][0]);
+                    System.out.println(shipCrdnts[i][2]);
+                    for (int k = shipCrdnts[i][0]; k <= shipCrdnts[i][2]; k++) {
+                         if (!field[k][shipCrdnts[i][1]].equals("X")) {
+                              return false;
+                         }
+                    }
                }
-               case "~" -> {
-                    this.field[crdnts[0]][crdnts[1]] = "M";
+               if (flag) {
+                    Arrays.fill(shipCrdnts[i], 0);
+                    return true;
+               }
+          }
+          return false;
+     }
+
+     public int takeShot(int[] crdnt, int count) {
+          switch (this.field[crdnt[0]][crdnt[1]]) {
+               case BUSY -> {
+                    this.field[crdnt[0]][crdnt[1]] = "X";
                     this.output(true);
-                    System.out.println("You missed!");
+                    if (isSankShip()) {
+                         if (count == BattleField.KindsOfShips.cellsToHit() - 1) {
+                              System.out.println("You sank the last ship. You won. Congratulations!");
+                         } else {
+                              System.out.println("You sank a ship! Specify a new target:");
+                         }
+                    } else {
+                         System.out.println("You hit a ship! Try again:");
+                    }
+                    return 1;
+               }
+               case "X" -> {
+                    this.output(true);
+                    System.out.println("You hit a ship! Try again:");
+                    return 0;
+               }
+               case "~", "M" -> {
+                    this.field[crdnt[0]][crdnt[1]] = "M";
+                    this.output(true);
+                    System.out.println("You missed! Try again:");
+                    return 0;
+               }
+               default -> {
+                    return 0;
                }
           }
      }

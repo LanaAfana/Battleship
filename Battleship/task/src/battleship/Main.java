@@ -10,7 +10,7 @@ public class Main {
         try (Scanner scanner = new Scanner(System.in)) {
             int[] inputCoordinates = battleField.getCoordinates(scanner.nextLine(), step);
             if (inputCoordinates.length == 4) {
-                battleField.addShip(inputCoordinates);
+                battleField.addShip(inputCoordinates, step);
                 battleField.output(false);
                 return 1;
             } else {
@@ -29,18 +29,16 @@ public class Main {
             step += placeShip(battleField, step, isRepeat);
             isRepeat = tempStep == step;
         }
-//        int count = 0;
+
         System.out.println("The game starts!");
         battleField.output(true);
         System.out.println("Take a shot!");
-        boolean flag = true;
-        while (flag) {
+        int count = 0;
+        while (count < BattleField.KindsOfShips.cellsToHit()) {
             try (Scanner scanner = new Scanner(System.in)) {
                 int[] inputCoordinate = battleField.getCoordinate(scanner.nextLine());
                 if (inputCoordinate.length == 2) {
-                    battleField.takeShot(inputCoordinate);
-                    battleField.output(false);
-                    flag = false;
+                    count += battleField.takeShot(inputCoordinate, count);
                 }
             }
         }
