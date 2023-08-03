@@ -2,6 +2,7 @@ package battleship;
 
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class BattleField {
      private final String[][] field;
@@ -60,6 +61,13 @@ public class BattleField {
           return input.split(" ")[1];
      }
 
+     public static void pressEnter() {
+          System.out.println("Press Enter and pass the move to another player\n");
+          try (Scanner scanner = new Scanner(System.in)) {
+               scanner.nextLine();
+          }
+     }
+
      private boolean isNotNumber(int number) {
           return (number < 0 || number >= this.size);
      }
@@ -103,10 +111,10 @@ public class BattleField {
 
      int[] getCoordinates(String input, int step) {
           int[] result = new int[4];
-          String x = getRawX(input);
-          String y = getRawY(input);
           String numPart;
           try {
+               String x = getRawX(input);
+               String y = getRawY(input);
                numPart = (x.length() == 2) ? String.valueOf(x.charAt(1)) :
                        x.charAt(1) + String.valueOf(x.charAt(2));
                int c1 = Integer.parseInt(numPart) - 1;
@@ -119,7 +127,7 @@ public class BattleField {
                c2 = letterToDigit(y.charAt(0));
                result[1] = Math.min(c1, c2);
                result[3] = Math.max(c1, c2);
-          } catch (NumberFormatException nfe) {
+          } catch (ArrayIndexOutOfBoundsException | NumberFormatException aio) {
                System.out.println("Error! Invalid input. Try again:");
           }
           return isCoordinates(result, step) ? result : new int[1];
@@ -179,7 +187,7 @@ public class BattleField {
                     if (j == 0) {
                          output.append(digitToLetter(i)).append(" ");
                     }
-                    if (fog && field[j][i].equals(BUSY)) {
+                    if (fog && !field[j][i].equals("~")) {
                          output.append("~").append(" ");
                     } else {
                          output.append(field[j][i]).append(" ");
@@ -187,7 +195,7 @@ public class BattleField {
                }
                output.append("\n");
           }
-          System.out.println(output);
+          System.out.print(output);
      }
 
      public void addShip(int[] crdnts, int step) {
@@ -200,26 +208,27 @@ public class BattleField {
      }
 
      boolean isSankShip() {
-          boolean flag = true;
-          for (int i = 0; i < shipCrdnts.length; i++) {
-               if (Arrays.stream(shipCrdnts[i]).sum() == 0) continue;
-               if (shipCrdnts[i][0] == shipCrdnts[i][2]) {
-                    for (int k = shipCrdnts[i][1]; k <= shipCrdnts[i][3]; k++) {
-                         if (!field[shipCrdnts[i][0]][k].equals("X")) {
-                              return false;
+          boolean flag;
+
+          for (int[] shipCrdnt : shipCrdnts) {
+               if (Arrays.stream(shipCrdnt).sum() == 0) continue;
+               flag = true;
+               if (shipCrdnt[0] == shipCrdnt[2]) { // x
+                    for (int k = shipCrdnt[1]; k <= shipCrdnt[3]; k++) {
+                         System.out.println("/ " + k);
+                         if (!field[shipCrdnt[0]][k].equals("X")) {
+                              flag = false;
                          }
                     }
                } else {
-                    System.out.println(shipCrdnts[i][0]);
-                    System.out.println(shipCrdnts[i][2]);
-                    for (int k = shipCrdnts[i][0]; k <= shipCrdnts[i][2]; k++) {
-                         if (!field[k][shipCrdnts[i][1]].equals("X")) {
-                              return false;
+                    for (int k = shipCrdnt[0]; k <= shipCrdnt[2]; k++) {
+                         if (!field[k][shipCrdnt[1]].equals("X")) {
+                              flag = false;
                          }
                     }
                }
                if (flag) {
-                    Arrays.fill(shipCrdnts[i], 0);
+                    Arrays.fill(shipCrdnt, 0);
                     return true;
                }
           }
@@ -230,27 +239,30 @@ public class BattleField {
           switch (this.field[crdnt[0]][crdnt[1]]) {
                case BUSY -> {
                     this.field[crdnt[0]][crdnt[1]] = "X";
-                    this.output(true);
                     if (isSankShip()) {
+                         System.out.println(count);
                          if (count == BattleField.KindsOfShips.cellsToHit() - 1) {
                               System.out.println("You sank the last ship. You won. Congratulations!");
                          } else {
-                              System.out.println("You sank a ship! Specify a new target:");
+                              System.out.println("You sank a ship!");
+                              pressEnter();
                          }
                     } else {
-                         System.out.println("You hit a ship! Try again:");
+                         System.out.println("You hit a ship!");
+                         pressEnter();
                     }
                     return 1;
                }
                case "X" -> {
                     this.output(true);
-                    System.out.println("You hit a ship! Try again:");
+                    System.out.println("You hit a ship!");
+                    pressEnter();
                     return 0;
                }
                case "~", "M" -> {
                     this.field[crdnt[0]][crdnt[1]] = "M";
-                    this.output(true);
-                    System.out.println("You missed! Try again:");
+                    System.out.println("You missed!");
+                    pressEnter();
                     return 0;
                }
                default -> {
